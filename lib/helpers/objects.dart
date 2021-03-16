@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'app_data.dart';
-import 'package:flutter/material.dart';
 
 final appData = AppData();
 
@@ -19,7 +19,7 @@ class RadioValue {
 class CircleTabIndicator extends Decoration {
   final BoxPainter _painter;
 
-  CircleTabIndicator({@required Color color, @required double radius})
+  CircleTabIndicator({Color color, double radius})
       : _painter = _CirclePainter(color, radius);
 
   @override
@@ -200,5 +200,39 @@ String groupingNameFor(FasesReceitas fase) {
       break;
     default:
       return "";
+  }
+}
+
+class TranslationMap {
+  List<dynamic> translationsEn;
+  List<dynamic> translationsPt;
+
+  TranslationMap(
+    this.translationsEn,
+    this.translationsPt,
+  );
+
+  factory TranslationMap.fromStream(
+      List<QueryDocumentSnapshot> queryDocumentSnapshots) {
+    List<dynamic> en = [];
+    List<dynamic> pt = [];
+
+    queryDocumentSnapshots.forEach((document) {
+      document.data().forEach((word, translations) {
+        translations[0].forEach((lang, value) {
+          if (lang == 'en') {
+            en.add({word: value});
+          }
+          if (lang == 'pt') {
+            pt.add({word: value});
+          }
+        });
+      });
+    });
+
+    return TranslationMap(
+      en,
+      pt,
+    );
   }
 }

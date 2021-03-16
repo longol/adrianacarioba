@@ -104,12 +104,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         .signInWithEmailAndPassword(
                             email: email, password: password)
                         .then((newUser) {
-                      if (newUser != null) {
-                        appData.setUserProperties(userId: newUser.user.uid);
-                        Navigator.pushNamed(context, App.screenId);
-                      } else {
-                        print("ERROR: got a null user " + newUser.toString());
-                      }
+                      appData.setUserProperties(userId: newUser.user.uid);
+                      Navigator.pushNamed(context, App.screenId);
                     });
                   },
                   minWidth: 200.0,

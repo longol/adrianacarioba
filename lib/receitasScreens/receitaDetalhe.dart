@@ -11,7 +11,7 @@ class ReceitaDetalheScreen extends StatefulWidget {
     return ReceitaDetalheScreenState();
   }
 
-  ReceitaDetalheScreen({@required this.receita});
+  ReceitaDetalheScreen({this.receita});
 }
 
 class ReceitaDetalheScreenState extends State<ReceitaDetalheScreen> {
@@ -76,7 +76,9 @@ class ReceitaDetalheScreenState extends State<ReceitaDetalheScreen> {
             children: [
               Container(
                 height: MediaQuery.of(context).size.width * 0.4,
-                child: snapshot.data,
+                child: Text(
+                  snapshot.data.toString(),
+                ),
               )
             ],
           );

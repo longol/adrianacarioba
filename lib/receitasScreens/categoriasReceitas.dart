@@ -14,7 +14,7 @@ class CategoriasReceitasScreen extends StatefulWidget {
   _CategoriasReceitasScreenState createState() =>
       _CategoriasReceitasScreenState();
 
-  CategoriasReceitasScreen({@required this.faseCurrent});
+  CategoriasReceitasScreen({this.faseCurrent});
 }
 
 class _CategoriasReceitasScreenState extends State<CategoriasReceitasScreen> {
@@ -104,64 +104,6 @@ class _CategoriasReceitasScreenState extends State<CategoriasReceitasScreen> {
         );
       },
     );
-  }
-
-  void _fixCategorias() {
-    var collection = FirebaseFirestore.instance.collection('receitas');
-
-    collection.where("categoria", isEqualTo: "Docess").get().then((value) {
-      value.docs.forEach((element) {
-        collection
-            .doc(element.id)
-            .update({"categoria": "Doces"}).then((_) => print("updated"));
-      });
-    });
-  }
-
-  void _fixImageUrl(List itemIDs) {
-    var collection = FirebaseFirestore.instance.collection('receitas');
-    itemIDs.forEach((itemID) {
-      collection.where("itemID", isEqualTo: itemID).get().then((value) {
-        value.docs.forEach((element) {
-          collection.doc(element.id).update({"imageUrl": itemID + ".png"}).then(
-              (_) => print("updated"));
-        });
-      });
-    });
-  }
-
-  void _fixNamesWithExtraSpace() {
-    receitasGlobal.forEach((element) {
-      Receita receita = Receita.fromStream(element);
-      int nomeLen = receita.nome.length;
-      String lastChar = receita.nome.substring(nomeLen - 1, nomeLen);
-      if (lastChar == " ") {
-        String newName = receita.nome.substring(0, nomeLen - 1);
-        String itemID = receita.id;
-        var collection = FirebaseFirestore.instance.collection('receitas');
-        collection.where("itemID", isEqualTo: itemID).get().then((value) {
-          value.docs.forEach((element) {
-            collection
-                .doc(element.id)
-                .update({"nome": newName}).then((_) => print("updated"));
-          });
-        });
-      }
-    });
-  }
-
-  void _addFields() {
-    receitasGlobal.forEach((element) {
-      Receita receita = Receita.fromStream(element);
-      String itemID = receita.id;
-      var collection = FirebaseFirestore.instance.collection('receitas');
-      collection.where("itemID", isEqualTo: itemID).get().then((value) {
-        value.docs.forEach((element) {
-          collection.doc(element.id).update({"descricao": "to do"}).then(
-              (_) => print("_addFields: updated"));
-        });
-      });
-    });
   }
 
   List _receitasGetCategories(List receitas) {

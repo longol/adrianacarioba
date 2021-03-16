@@ -11,7 +11,7 @@ class ReceitasCategoriaScreen extends StatefulWidget {
   _ReceitasCategoriaScreenState createState() =>
       _ReceitasCategoriaScreenState();
 
-  ReceitasCategoriaScreen({@required this.receitas, @required this.categoria});
+  ReceitasCategoriaScreen({this.receitas, this.categoria});
 }
 
 class _ReceitasCategoriaScreenState extends State<ReceitasCategoriaScreen> {
@@ -77,7 +77,7 @@ class _ReceitasCategoriaScreenState extends State<ReceitasCategoriaScreen> {
             leading: Container(
               width: 50.0,
               height: 50.0,
-              child: snapshot.data,
+              child: Text(snapshot.data.toString()),
             ),
             // trailing: Text(receita.id),
             trailing: Icon(

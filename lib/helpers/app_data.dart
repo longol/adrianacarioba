@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:adrianacarioba/helpers/objects.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AppData {
   static final AppData _appData = new AppData._internal();
@@ -16,21 +17,8 @@ class AppData {
   final FirebaseAnalytics _analytics = FirebaseAnalytics();
   FirebaseAnalyticsObserver getAnalyticsObserver() =>
       FirebaseAnalyticsObserver(analytics: _analytics);
-  Future setUserProperties({@required String userId}) async {
+  Future setUserProperties({String userId}) async {
     await _analytics.setUserId(userId);
-  }
-
-  Future<void> launchInBrowser(String url) async {
-    if (await canLaunch(url)) {
-      await launch(
-        url,
-        forceSafariVC: false,
-        forceWebView: false,
-        headers: <String, String>{'my_header_key': 'my_header_value'},
-      );
-    } else {
-      throw 'Could not launch $url';
-    }
   }
 
   Future<Widget> getImage(
@@ -42,10 +30,10 @@ class AppData {
       final link = await child.getDownloadURL();
       return CachedNetworkImage(
         imageUrl: link,
-        // placeholder: (context, url) => Container(
-        //   height: 30,
-        //   child: CircularProgressIndicator(),
-        // ),
+        placeholder: (context, url) => Container(
+          height: 30,
+          child: CircularProgressIndicator(),
+        ),
         errorWidget: (context, url, error) => Icon(Icons.error),
         fit: BoxFit.scaleDown,
       );
@@ -59,5 +47,67 @@ class AppData {
 
   void onError(error) {
     print("ERROR: IMAGE NOT FOUND " + error.toString());
+  }
+
+  // ignore: unused_element
+  void _fixCategorias() {
+    var collection = FirebaseFirestore.instance.collection('receitas');
+
+    collection.where("categoria", isEqualTo: "Docess").get().then((value) {
+      value.docs.forEach((element) {
+        collection
+            .doc(element.id)
+            .update({"categoria": "Doces"}).then((_) => print("updated"));
+      });
+    });
+  }
+
+  // ignore: unused_element
+  void _fixImageUrl(List itemIDs) {
+    var collection = FirebaseFirestore.instance.collection('receitas');
+    itemIDs.forEach((itemID) {
+      collection.where("itemID", isEqualTo: itemID).get().then((value) {
+        value.docs.forEach((element) {
+          collection.doc(element.id).update({"imageUrl": itemID + ".png"}).then(
+              (_) => print("updated"));
+        });
+      });
+    });
+  }
+
+  // ignore: unused_element
+  void _fixNamesWithExtraSpace() {
+    receitasGlobal.forEach((element) {
+      Receita receita = Receita.fromStream(element);
+      int nomeLen = receita.nome.length;
+      String lastChar = receita.nome.substring(nomeLen - 1, nomeLen);
+      if (lastChar == " ") {
+        String newName = receita.nome.substring(0, nomeLen - 1);
+        String itemID = receita.id;
+        var collection = FirebaseFirestore.instance.collection('receitas');
+        collection.where("itemID", isEqualTo: itemID).get().then((value) {
+          value.docs.forEach((element) {
+            collection
+                .doc(element.id)
+                .update({"nome": newName}).then((_) => print("updated"));
+          });
+        });
+      }
+    });
+  }
+
+  // ignore: unused_element
+  void _addFields() {
+    receitasGlobal.forEach((element) {
+      Receita receita = Receita.fromStream(element);
+      String itemID = receita.id;
+      var collection = FirebaseFirestore.instance.collection('receitas');
+      collection.where("itemID", isEqualTo: itemID).get().then((value) {
+        value.docs.forEach((element) {
+          collection.doc(element.id).update({"descricao": "to do"}).then(
+              (_) => print("_addFields: updated"));
+        });
+      });
+    });
   }
 }
