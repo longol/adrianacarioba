@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'app_data.dart';
 
+// GLOBAL VARIABLES
 final appData = AppData();
-
 List receitasGlobal = [];
 
 class RadioValue {
@@ -204,8 +204,8 @@ String groupingNameFor(FasesReceitas fase) {
 }
 
 class TranslationMap {
-  List<dynamic> translationsEn;
-  List<dynamic> translationsPt;
+  Map translationsEn;
+  Map translationsPt;
 
   TranslationMap(
     this.translationsEn,
@@ -214,19 +214,18 @@ class TranslationMap {
 
   factory TranslationMap.fromStream(
       List<QueryDocumentSnapshot> queryDocumentSnapshots) {
-    List<dynamic> en = [];
-    List<dynamic> pt = [];
+    Map en = {};
+    Map pt = {};
 
     queryDocumentSnapshots.forEach((document) {
-      document.data().forEach((word, translations) {
-        translations[0].forEach((lang, value) {
-          if (lang == 'en') {
-            en.add({word: value});
-          }
-          if (lang == 'pt') {
-            pt.add({word: value});
-          }
-        });
+      print('TranslationMap.fromStream $document');
+      document.data().forEach((key, value) {
+        print(key);
+        print(value['pt']);
+        print(value['en']);
+
+        pt[key] = value['pt'];
+        en[key] = value['en'];
       });
     });
 

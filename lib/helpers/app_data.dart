@@ -1,3 +1,4 @@
+import 'package:adrianacarioba/allTranslations.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
@@ -8,17 +9,35 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AppData {
   static final AppData _appData = new AppData._internal();
+  Map translations = {};
 
   AppData._internal();
+
   factory AppData() {
     return _appData;
   }
 
   final FirebaseAnalytics _analytics = FirebaseAnalytics();
+
   FirebaseAnalyticsObserver getAnalyticsObserver() =>
       FirebaseAnalyticsObserver(analytics: _analytics);
   Future setUserProperties({String userId}) async {
     await _analytics.setUserId(userId);
+  }
+
+  Future setTranslations() {
+    String language = allTranslations.currentLanguage;
+
+    FirebaseFirestore.instance.collection('translations').get().then((value) {
+      TranslationMap translationMap = TranslationMap.fromStream(value.docs);
+      if (language == "pt") {
+        translations = translationMap.translationsPt;
+      }
+      if (language == "en") {
+        translations = translationMap.translationsEn;
+      }
+      return true;
+    });
   }
 
   Future<Widget> getImage(

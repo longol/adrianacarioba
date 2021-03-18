@@ -20,7 +20,7 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
     String dropdownValue = 'One';
 
     final String language = allTranslations.currentLanguage;
-    print("current language: ${language}");
+    print("current language: $language");
     String newRecipe = allTranslations.text('newRecipe');
 
     return Padding(

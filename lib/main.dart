@@ -16,6 +16,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await allTranslations.init();
+  await appData.setTranslations();
 
   runApp(AdrianaCariobaApp());
 }
@@ -34,8 +35,7 @@ class _AdrianaCariobaAppState extends State<AdrianaCariobaApp> {
   void initState() {
     super.initState();
 
-    // Initializes a callback should something need
-    // to be done when the language is changed
+    AppData();
     allTranslations.onLocaleChangedCallback = _onLocaleChanged;
   }
 
@@ -47,7 +47,6 @@ class _AdrianaCariobaAppState extends State<AdrianaCariobaApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    AppData();
     return MaterialApp(
       title: "Adriana Carioba",
       theme: ThemeData(

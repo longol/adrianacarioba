@@ -17,6 +17,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return updateInterface();
+    // return FutureBuilder(
+    //   future: appData.setTranslations(),
+    //   builder: (context, snapshot) {
+    //     return updateInterface();
+    //   },
+    // );
+  }
+
+  Widget updateInterface() {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -111,7 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   minWidth: 200.0,
                   height: 42.0,
                   child: Text(
-                    'Log In',
+                    appData.translations.isEmpty
+                        ? 'loading'
+                        : appData.translations['login'],
                   ),
                 ),
               ),
