@@ -1,3 +1,4 @@
+import 'package:adrianacarioba/allTranslations.dart';
 import 'package:flutter/material.dart';
 import 'package:adrianacarioba/helpers/objects.dart';
 import 'package:adrianacarioba/app.dart';
@@ -18,12 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return updateInterface();
-    // return FutureBuilder(
-    //   future: appData.setTranslations(),
-    //   builder: (context, snapshot) {
-    //     return updateInterface();
-    //   },
-    // );
   }
 
   Widget updateInterface() {
@@ -121,9 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   minWidth: 200.0,
                   height: 42.0,
                   child: Text(
-                    appData.translations.isEmpty
-                        ? 'loading'
-                        : appData.translations['login'],
+                    allTranslations.text('login'),
                   ),
                 ),
               ),

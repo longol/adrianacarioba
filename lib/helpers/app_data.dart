@@ -25,21 +25,6 @@ class AppData {
     await _analytics.setUserId(userId);
   }
 
-  Future setTranslations() {
-    String language = allTranslations.currentLanguage;
-
-    FirebaseFirestore.instance.collection('translations').get().then((value) {
-      TranslationMap translationMap = TranslationMap.fromStream(value.docs);
-      if (language == "pt") {
-        translations = translationMap.translationsPt;
-      }
-      if (language == "en") {
-        translations = translationMap.translationsEn;
-      }
-      return true;
-    });
-  }
-
   Future<Widget> getImage(
       BuildContext context, String imageUrl, double imageHeight) async {
     final ref = firebase_storage.FirebaseStorage.instance.ref();

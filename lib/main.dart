@@ -16,7 +16,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await allTranslations.init();
-  await appData.setTranslations();
 
   runApp(AdrianaCariobaApp());
 }

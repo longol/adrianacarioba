@@ -202,36 +202,3 @@ String groupingNameFor(FasesReceitas fase) {
       return "";
   }
 }
-
-class TranslationMap {
-  Map translationsEn;
-  Map translationsPt;
-
-  TranslationMap(
-    this.translationsEn,
-    this.translationsPt,
-  );
-
-  factory TranslationMap.fromStream(
-      List<QueryDocumentSnapshot> queryDocumentSnapshots) {
-    Map en = {};
-    Map pt = {};
-
-    queryDocumentSnapshots.forEach((document) {
-      print('TranslationMap.fromStream $document');
-      document.data().forEach((key, value) {
-        print(key);
-        print(value['pt']);
-        print(value['en']);
-
-        pt[key] = value['pt'];
-        en[key] = value['en'];
-      });
-    });
-
-    return TranslationMap(
-      en,
-      pt,
-    );
-  }
-}

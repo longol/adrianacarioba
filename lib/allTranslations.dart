@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 ///
 /// Preferences related
 ///
-const String _storageKey = "MyApplication_";
+const String _storageKey = "AdrianaCariobaApplication_";
 const List<String> _supportedLanguages = ['pt', 'en'];
 Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -48,6 +49,7 @@ class GlobalTranslations {
   Future<Null> init([String language]) async {
     if (_locale == null) {
       await setNewLanguage(language);
+      await getTranslations();
     }
     return null;
   }
@@ -97,6 +99,18 @@ class GlobalTranslations {
   ///
   set onLocaleChangedCallback(VoidCallback callback) {
     _onLocaleChangedCallback = callback;
+  }
+
+  ///
+  /// Get translations from Firebase
+  ///
+
+  Future<void> getTranslations() async {
+    DocumentSnapshot ds = await FirebaseFirestore.instance
+        .collection('translations')
+        .doc(currentLanguage)
+        .get();
+    _localizedValues = ds.data();
   }
 
   ///
