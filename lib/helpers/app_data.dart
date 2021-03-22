@@ -22,18 +22,22 @@ class AppData {
   FirebaseAnalyticsObserver getAnalyticsObserver() =>
       FirebaseAnalyticsObserver(analytics: _analytics);
   Future setUserProperties({String userId}) async {
+    // _printMateriais();
+    _fixCategorias();
+
     await _analytics.setUserId(userId);
   }
 
   Future<Widget> getImage(
       BuildContext context, String imageUrl, double imageHeight) async {
-    final ref = firebase_storage.FirebaseStorage.instance.ref();
-    final child = ref.child(imageUrl);
+    final image =
+        firebase_storage.FirebaseStorage.instance.ref().child(imageUrl);
     imageHeight = imageHeight * 1.0;
+
     try {
-      final link = await child.getDownloadURL();
+      var url = await image.getDownloadURL();
       return CachedNetworkImage(
-        imageUrl: link,
+        imageUrl: url,
         placeholder: (context, url) => Container(
           height: 30,
           child: CircularProgressIndicator(),
@@ -41,11 +45,8 @@ class AppData {
         errorWidget: (context, url, error) => Icon(Icons.error),
         fit: BoxFit.scaleDown,
       );
-    } catch (e) {
-      return Image.asset(
-        "images/logoFueSmall.png",
-        fit: BoxFit.scaleDown,
-      );
+    } catch (error) {
+      print("ERROR: IMAGE $imageUrl NOT FOUND $error.toString()");
     }
   }
 
@@ -53,15 +54,31 @@ class AppData {
     print("ERROR: IMAGE NOT FOUND " + error.toString());
   }
 
+// ignore: unused_element
+  void _printMateriais() {
+    var snapshots =
+        FirebaseFirestore.instance.collection('receitas').snapshots();
+    snapshots.forEach((element) {
+      element.docs.forEach((r) {
+        Receita receita = Receita.fromStream(r);
+        print(receita.material);
+      });
+    });
+  }
+
   // ignore: unused_element
   void _fixCategorias() {
     var collection = FirebaseFirestore.instance.collection('receitas');
 
-    collection.where("categoria", isEqualTo: "Docess").get().then((value) {
+    collection
+        .where("categoria", isEqualTo: "Receitas de uma panela só")
+        .get()
+        .then((value) {
       value.docs.forEach((element) {
         collection
             .doc(element.id)
-            .update({"categoria": "Doces"}).then((_) => print("updated"));
+            .update({"categoria": "Receitas de uma Panela só"}).then(
+                (_) => print("updated"));
       });
     });
   }

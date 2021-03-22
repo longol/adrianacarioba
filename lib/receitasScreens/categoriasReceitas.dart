@@ -90,7 +90,7 @@ class _CategoriasReceitasScreenState extends State<CategoriasReceitasScreen> {
         child: Image.asset("images/logoFue.png"),
       ),
       trailing: Icon(
-        Icons.arrow_right_alt_rounded,
+        Icons.arrow_right_rounded,
       ),
       onTap: () {
         Navigator.push(

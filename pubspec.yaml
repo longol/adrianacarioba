@@ -16,6 +16,7 @@ dependencies:
   diacritic: ^0.1.1
 
   intl: ^0.17.0 
+
   firebase_core: ^1.0.1
   firebase_auth: ^1.0.1
   cloud_firestore: ^1.0.1
@@ -24,9 +25,12 @@ dependencies:
   firebase_storage: ^8.0.0
 
   cached_network_image: ^2.5.0
+  
   material_segmented_control: ^2.1.1+1
   
   shared_preferences: ^0.4.3
+
+  multiselect_formfield: ^0.1.5
 
 dev_dependencies:
   flutter_test:
