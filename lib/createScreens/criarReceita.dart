@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:multiselect_formfield/multiselect_formfield.dart';
 
 final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-List utensiliosDataSource = [];
 
 class CriarReceitaScreen extends StatefulWidget {
-  static String screenId = "criarReceita";
+  static String screenId = 'criarReceita';
 
   @override
   _CriarReceitaScreenState createState() => _CriarReceitaScreenState();
@@ -17,6 +16,9 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
   List utensilios = [];
   String utensiliosResult = '';
   String categoria = '';
+  List ingredientesFields;
+  List utensiliosDataSource = [];
+  bool didChange = false;
 
   Future<void> selectorDataFor(String documentName) async {
     DocumentSnapshot ds = await FirebaseFirestore.instance
@@ -31,6 +33,7 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
   @override
   void initState() {
     selectorDataFor('utensilios');
+    ingredientesFields = ['Novo ingrediente'];
     super.initState();
   }
 
@@ -46,23 +49,34 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
         key: _formKey,
         autovalidateMode: AutovalidateMode.always,
         child: ListView(
-          children: <Widget>[
-            _sectionTitle(title: allTranslations.text('newRecipe')),
-            _textField(name: 'Nome da receita', required: true),
-            _textField(name: 'Descrição', required: false),
-            _textField(name: 'Foto', required: false),
-            _sectionTitle(title: "Tempos de execução  "),
-            _textField(name: 'Tempo de preparo', required: true),
-            _textField(name: 'Tempo de cozimento', required: false),
-            _textField(name: 'Tempo de resfriamento', required: false),
-            _textField(name: 'Validade', required: false),
-            // _dropDownField(categoria),
-            _multiFormField("Utensilios", utensiliosDataSource),
-            _actionButtons(),
-          ],
+          children: buildFormFields(),
         ),
       ),
     );
+  }
+
+  List<Widget> buildFormFields() {
+    List<Widget> fields = [];
+
+    fields.add(_sectionTitle(title: allTranslations.text('newRecipe')));
+    fields.add(_textField(name: 'Nome da receita', required: true));
+    fields.add(_textField(name: 'Descrição', required: false));
+    fields.add(_textField(name: 'Foto', required: false));
+    fields.add(_sectionTitle(title: 'Tempos de execução'));
+    fields.add(_textField(name: 'Tempo de preparo', required: true));
+    fields.add(_textField(name: 'Tempo de cozimento', required: false));
+    fields.add(_textField(name: 'Tempo de resfriamento', required: false));
+    fields.add(_textField(name: 'Validade', required: false));
+    fields.add(_multiFormField('Utensilios', utensiliosDataSource));
+
+    fields.add(_sectionTitle(title: 'Ingredientes'));
+
+    List<Widget> ingredienteContainer = _ingredientesContainer();
+
+    fields.addAll(ingredienteContainer);
+
+    fields.add(_actionButtons());
+    return fields;
   }
 
   Widget _actionButtons() {
@@ -72,12 +86,12 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
         Spacer(),
         ElevatedButton(
           onPressed: _enviarAction,
-          child: Text("Enviar"),
+          child: Text('Enviar'),
         ),
         Spacer(),
         ElevatedButton(
           onPressed: _resetAction,
-          child: Text("Resetar"),
+          child: Text('Resetar'),
         ),
         Spacer(),
       ],
@@ -146,7 +160,7 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
     );
   }
 
-  _sectionTitle({String title}) {
+  Widget _sectionTitle({String title}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
@@ -156,7 +170,7 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
     );
   }
 
-  _textField({String name, bool required}) {
+  Widget _textField({String name, bool required}) {
     return TextFormField(
       decoration: InputDecoration(
         hintText: name,
@@ -172,13 +186,87 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
     );
   }
 
+  List<Widget> _ingredientesContainer() {
+    List<Widget> result = [];
+
+    ingredientesFields.asMap().forEach((index, element) {
+      List<Widget> rowElements = [
+        Expanded(
+          child: _textField(name: element, required: false),
+        )
+      ];
+
+      rowElements.addAll(_rowEditButtonsIngredients(
+          index: index, count: ingredientesFields.length));
+
+      Widget ingredienteContainer = Container(
+        width: MediaQuery.of(context).size.width,
+        child: Row(
+          children: rowElements,
+        ),
+      );
+
+      result.add(ingredienteContainer);
+    });
+
+    return result;
+  }
+
+  List<Widget> _rowEditButtonsIngredients({int index, int count}) {
+    List<Widget> buttons = [];
+
+    Widget addButton = Padding(
+      padding: const EdgeInsets.all(1.0),
+      child: SizedBox(
+        width: 40,
+        height: 30,
+        child: ElevatedButton(
+          onPressed: () {
+            setState(() {
+              ingredientesFields.insert(index, 'Novo ingrediente');
+            });
+          },
+          child: Text('+'),
+        ),
+      ),
+    );
+
+    Widget deleteButton = Padding(
+      padding: const EdgeInsets.all(1.0),
+      child: SizedBox(
+        width: 40,
+        height: 30,
+        child: ElevatedButton(
+          onPressed: () {
+            if (ingredientesFields.length > 1) {
+              ingredientesFields.removeAt(index);
+              setState(() {
+                didChange = !didChange;
+              });
+            }
+          },
+          child: Text('-'),
+        ),
+      ),
+    );
+
+    if (count == 1) {
+      buttons.add(addButton);
+    } else if (index == count - 1) {
+      buttons.add(deleteButton);
+      buttons.add(addButton);
+    }
+
+    return buttons;
+  }
+
   // ignore: unused_element
   void _enviarAction() {
     if (_formKey.currentState.validate()) {
       utensiliosResult = utensilios.toString();
-      print("DEBUG: _enviarAction: ${_formKey.currentState.validate()}");
-      print("DEBUG: utensilios $utensilios");
-      print("DEBUG: utensiliosResult $utensiliosResult");
+      print('DEBUG: _enviarAction: ${_formKey.currentState.validate()}');
+      print('DEBUG: utensilios $utensilios');
+      print('DEBUG: utensiliosResult $utensiliosResult');
     }
   }
 
@@ -188,6 +276,6 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
     utensiliosResult = '';
 
     _formKey.currentState.reset();
-    // print("DEBUG: _resetAction: ${_fbKey.currentState.value}");
+    // print('DEBUG: _resetAction: ${_fbKey.currentState.value}');
   }
 }
