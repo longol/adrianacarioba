@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:adrianacarioba/allTranslations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:multiselect_formfield/multiselect_formfield.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:adrianacarioba/helpers/objects.dart';
 
 final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -16,24 +20,21 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
   List utensilios = [];
   String utensiliosResult = '';
   String categoria = '';
-  List ingredientesFields;
+  List<IngredienteReceita> ingredienteInputCards = [];
+  List ingredientesFields = [];
   List utensiliosDataSource = [];
   bool didChange = false;
 
-  Future<void> selectorDataFor(String documentName) async {
-    DocumentSnapshot ds = await FirebaseFirestore.instance
-        .collection('selectorData')
-        .doc(documentName)
-        .get();
-    ds.data().forEach((key, value) {
-      utensiliosDataSource.add({'display': value, 'value': key});
-    });
-  }
+  File _pickedImage;
+  final picker = ImagePicker();
 
   @override
   void initState() {
     selectorDataFor('utensilios');
     ingredientesFields = ['Novo ingrediente'];
+    IngredienteReceita ir =
+        IngredienteReceita(1, Medida.xicaras, "abobrinha", "Bem madura");
+    ingredienteInputCards = [ir];
     super.initState();
   }
 
@@ -49,19 +50,20 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
         key: _formKey,
         autovalidateMode: AutovalidateMode.always,
         child: ListView(
-          children: buildFormFields(),
+          children: _buildFormFields(),
         ),
       ),
     );
   }
 
-  List<Widget> buildFormFields() {
+  List<Widget> _buildFormFields() {
     List<Widget> fields = [];
 
     fields.add(_sectionTitle(title: allTranslations.text('newRecipe')));
+    fields.add(_imagePicker());
     fields.add(_textField(name: 'Nome da receita', required: true));
     fields.add(_textField(name: 'Descrição', required: false));
-    fields.add(_textField(name: 'Foto', required: false));
+
     fields.add(_sectionTitle(title: 'Tempos de execução'));
     fields.add(_textField(name: 'Tempo de preparo', required: true));
     fields.add(_textField(name: 'Tempo de cozimento', required: false));
@@ -70,13 +72,57 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
     fields.add(_multiFormField('Utensilios', utensiliosDataSource));
 
     fields.add(_sectionTitle(title: 'Ingredientes'));
-
     List<Widget> ingredienteContainer = _ingredientesContainer();
-
     fields.addAll(ingredienteContainer);
+
+    fields.add(_sectionTitle(title: 'Ingrediente Input Cards'));
+    List<Widget> ingredienteInputCards = _ingredienteInputCards();
+    fields.addAll(ingredienteInputCards);
 
     fields.add(_actionButtons());
     return fields;
+  }
+
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _pickedImage = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
+  Future<void> selectorDataFor(String documentName) async {
+    DocumentSnapshot ds = await FirebaseFirestore.instance
+        .collection('selectorData')
+        .doc(documentName)
+        .get();
+    ds.data().forEach((key, value) {
+      utensiliosDataSource.add({'display': value, 'value': key});
+    });
+  }
+
+  Widget _sectionTitle({String title}) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        children: [
+          const Divider(
+            height: 20,
+            thickness: 5,
+            indent: 20,
+            endIndent: 20,
+          ),
+          Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _actionButtons() {
@@ -98,6 +144,7 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
     );
   }
 
+  // ignore: unused_element
   Widget _dropDownField(String dropdownValue) {
     return DropdownButton<String>(
       value: dropdownValue,
@@ -160,30 +207,64 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
     );
   }
 
-  Widget _sectionTitle({String title}) {
+  Widget _textField({String name, bool required}) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(
-        title,
-        style: TextStyle(fontWeight: FontWeight.bold),
+      padding: const EdgeInsets.all(8),
+      child: TextFormField(
+        decoration: InputDecoration(
+          hintText: name,
+        ),
+        validator: (String value) {
+          if (required) {
+            if (value == null || value.isEmpty) {
+              return 'Campo obrigatório';
+            }
+          }
+          return null;
+        },
       ),
     );
   }
 
-  Widget _textField({String name, bool required}) {
-    return TextFormField(
-      decoration: InputDecoration(
-        hintText: name,
+  Widget _imagePicker() {
+    return Center(
+      child: Container(
+        width: 200.0,
+        height: 200.0,
+        child: MaterialButton(
+          onPressed: getImage,
+          child: _pickedImage == null
+              ? Icon(Icons.add_a_photo)
+              : Image.file(_pickedImage),
+        ),
       ),
-      validator: (String value) {
-        if (required) {
-          if (value == null || value.isEmpty) {
-            return 'Campo obrigatório';
-          }
-        }
-        return null;
-      },
     );
+  }
+
+  List<Widget> _ingredienteInputCards() {
+    List<Widget> result = [];
+
+    ingredienteInputCards.asMap().forEach((index, inputCard) {
+      List<Widget> rowElements = [
+        Text(
+          inputCard.description(),
+        ),
+      ];
+
+      rowElements.addAll(_rowEditButtonsIngredients(
+          index: index, count: ingredienteInputCards.length));
+
+      Widget ingredienteContainer = Container(
+        width: MediaQuery.of(context).size.width,
+        child: Row(
+          children: rowElements,
+        ),
+      );
+
+      result.add(ingredienteContainer);
+    });
+
+    return result;
   }
 
   List<Widget> _ingredientesContainer() {
@@ -222,7 +303,10 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
         height: 30,
         child: ElevatedButton(
           onPressed: () {
+            IngredienteReceita ir = IngredienteReceita(
+                1, Medida.xicaras, "abobrinha", "Bem madura");
             setState(() {
+              ingredienteInputCards.add(ir);
               ingredientesFields.insert(index, 'Novo ingrediente');
             });
           },
@@ -238,6 +322,12 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
         height: 30,
         child: ElevatedButton(
           onPressed: () {
+            if (ingredienteInputCards.length > 1) {
+              ingredienteInputCards.removeAt(index);
+              setState(() {
+                didChange = !didChange;
+              });
+            }
             if (ingredientesFields.length > 1) {
               ingredientesFields.removeAt(index);
               setState(() {
@@ -260,22 +350,24 @@ class _CriarReceitaScreenState extends State<CriarReceitaScreen> {
     return buttons;
   }
 
-  // ignore: unused_element
   void _enviarAction() {
     if (_formKey.currentState.validate()) {
       utensiliosResult = utensilios.toString();
-      print('DEBUG: _enviarAction: ${_formKey.currentState.validate()}');
-      print('DEBUG: utensilios $utensilios');
-      print('DEBUG: utensiliosResult $utensiliosResult');
     }
   }
 
-  // ignore: unused_element
   void _resetAction() {
     utensilios = [];
     utensiliosResult = '';
-
+    _pickedImage = null;
+    ingredientesFields = ['Novo ingrediente'];
+    IngredienteReceita ir =
+        IngredienteReceita(1, Medida.xicaras, "abobrinha", "Bem madura");
+    ingredienteInputCards = [ir];
     _formKey.currentState.reset();
-    // print('DEBUG: _resetAction: ${_fbKey.currentState.value}');
+
+    setState(() {
+      didChange = !didChange;
+    });
   }
 }

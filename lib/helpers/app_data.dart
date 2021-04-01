@@ -1,4 +1,3 @@
-import 'package:adrianacarioba/allTranslations.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
@@ -38,15 +37,14 @@ class AppData {
       var url = await image.getDownloadURL();
       return CachedNetworkImage(
         imageUrl: url,
-        placeholder: (context, url) => Container(
-          height: 30,
-          child: CircularProgressIndicator(),
-        ),
+        placeholder: (context, url) =>
+            Scaffold(), //CircularProgressIndicator(),
         errorWidget: (context, url, error) => Icon(Icons.error),
         fit: BoxFit.scaleDown,
       );
     } catch (error) {
       print("ERROR: IMAGE $imageUrl NOT FOUND $error.toString()");
+      return Text("Error");
     }
   }
 

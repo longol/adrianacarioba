@@ -175,6 +175,34 @@ class Etapa {
   }
 }
 
+enum Medida {
+  xicaras,
+  ml,
+  colherDeCha,
+  colherDeSopa,
+  unidade,
+  aGosto,
+  folhas,
+}
+
+class IngredienteReceita {
+  num quantidade;
+  Medida medida;
+  String ingrediente;
+  String observacao;
+
+  IngredienteReceita(
+    this.quantidade,
+    this.medida,
+    this.ingrediente,
+    this.observacao,
+  );
+
+  String description() {
+    return "$quantidade $medida de $ingrediente. $observacao";
+  }
+}
+
 enum FasesReceitas {
   fase1,
   fase2,

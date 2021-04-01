@@ -27,7 +27,7 @@ class AdrianaCariobaApp extends StatefulWidget {
 
 class _AdrianaCariobaAppState extends State<AdrianaCariobaApp> {
   static FirebaseAnalytics analytics = FirebaseAnalytics();
-  static FirebaseAnalyticsObserver observer =
+  final FirebaseAnalyticsObserver observer =
       FirebaseAnalyticsObserver(analytics: analytics);
 
   @override

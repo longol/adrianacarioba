@@ -76,9 +76,7 @@ class ReceitaDetalheScreenState extends State<ReceitaDetalheScreen> {
             children: [
               Container(
                 height: MediaQuery.of(context).size.width * 0.4,
-                child: Text(
-                  snapshot.data.toString(),
-                ),
+                child: snapshot.data,
               )
             ],
           );

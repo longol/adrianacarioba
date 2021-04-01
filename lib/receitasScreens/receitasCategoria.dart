@@ -77,7 +77,7 @@ class _ReceitasCategoriaScreenState extends State<ReceitasCategoriaScreen> {
             leading: Container(
               width: 50.0,
               height: 50.0,
-              child: Text(snapshot.data.toString()),
+              child: snapshot.data,
             ),
             // trailing: Text(receita.id),
             trailing: Icon(
@@ -93,20 +93,6 @@ class _ReceitasCategoriaScreenState extends State<ReceitasCategoriaScreen> {
                 ),
               );
             },
-          );
-        }
-        if (snapshot.connectionState == ConnectionState.waiting ||
-            snapshot.connectionState == ConnectionState.active) {
-          return ListTile(
-            title: Text("Carregando..."),
-            leading: Container(
-              width: 20.0,
-              height: 20.0,
-              child: Container(
-                height: 30,
-                child: CircularProgressIndicator(),
-              ),
-            ),
           );
         }
         return Text("Sorry an error occured");
